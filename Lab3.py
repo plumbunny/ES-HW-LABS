@@ -66,12 +66,22 @@ try:
                     print(f"✍️ Writing {cccd_value.hex()} to CCCD {cccd.uuid}")
                     dev.writeCharacteristic(cccd.handle, cccd_value, withResponse=True)
                     print("✅ CCCD set to", cccd_value.hex())
-                    dev.disconnect()
-                    exit(0)
+                   
                 else:
                     print("⚠️ No CCCD descriptor found")
+
+except BTLEException as e:
+    print("❌ Error during CCCD write:", e)
+try:
+    testService = dev.getServiceByUUID(UUID(0xfff0))
+    for ch in testService.getCharacteristics():
+        print(str(ch))
+    ch=dev.getCharacteristics(uuid=UUID(0xfff1))[0]
+    if(ch.supportsRead()):
+        print(ch.read())
 except BTLEException as e:
     print("❌ Error during CCCD write:", e)
 
 dev.disconnect()
 print("🔌 Disconnected.")
+
