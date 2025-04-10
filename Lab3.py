@@ -42,7 +42,7 @@ except BTLEException as e:
     print("❌ Failed to connect:", e)
     exit(1)
 
-# Step 5: Find Notify/Indicate characteristics and write CCCD
+# Step 5: Find Notify/Indicate Characteristics
 try:
     for svc in dev.getServices():
         for ch in svc.getCharacteristics():
@@ -53,7 +53,7 @@ try:
                 if descriptors:
                     cccd = descriptors[0]
 
-                    # Smart write based on support
+                    # Smart CCCD value selection
                     if "INDICATE" in props:
                         cccd_value = b"\x02\x00"
                     elif "NOTIFY" in props:
@@ -63,19 +63,10 @@ try:
                         dev.disconnect()
                         exit(1)
 
-                    # Check existing CCCD value
-                    current_value = dev.readCharacteristic(cccd.handle)
-                    print(f"🧾 Current CCCD value: {current_value.hex()}")
-
-                    if current_value == cccd_value:
-                        print("✅ CCCD already set correctly, skipping write.")
-                    else:
-                        print(f"✍️ Writing {cccd_value.hex()} to CCCD {cccd.uuid}")
-                        dev.writeCharacteristic(cccd.handle, cccd_value, withResponse=True)
-                        print("✅ CCCD successfully updated.")
-
+                    print(f"✍️ Writing {cccd_value.hex()} to CCCD {cccd.uuid}")
+                    dev.writeCharacteristic(cccd.handle, cccd_value, withResponse=True)
+                    print("✅ CCCD set to", cccd_value.hex())
                     dev.disconnect()
-                    print("🔌 Disconnected.")
                     exit(0)
                 else:
                     print("⚠️ No CCCD descriptor found")
